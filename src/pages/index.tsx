@@ -1,12 +1,19 @@
+import { useState, useEffect } from 'react';
+
 import { GetStaticProps } from 'next';
+import Link from 'next/link';
 
 import { AiOutlineCalendar, AiOutlineUser } from 'react-icons/ai';
+
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+
 
 interface Post {
   uid?: string;
@@ -27,72 +34,71 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home() {
+export default function Home({ postsPagination }: HomeProps) {
+  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+
+  async function handleNextPage() {
+    const response = await fetch(postsPagination.next_page);
+    const data = await response.json();
+      
+    const next_page = data.next_page;
+    const newPosts = data.results.map(post => {
+      return {
+        uid: post.uid,
+        first_publication_date: format(
+          new Date(post.last_publication_date),
+          "dd MMM yyyy",
+          {
+            locale: ptBR,
+          }
+        ),
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        }
+      }
+    })
+
+    setPosts([...posts, ...newPosts]);
+    setNextPage(next_page);
+  }
+
   return (
     <>
       <div className={styles.homeBox}>
         <img src="/logo.svg" alt="logo" />
 
-        <a>
-            <h1>Title of the Post</h1>
-            <p>Subtitle of the Post</p>
-            <div className={styles.postInfo}>
-              <div id="createdAt">
-                <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
-                <time>15 Mar 2021</time>
-              </div>
-              <div id="author">
-                <AiOutlineUser size="20" color={`var(--gray-500)`}/>
-                <span>Joseph Oliveira</span>
-              </div>
-            </div>
-        </a>
+        { posts.map(post => {
+          return ( 
+            <Link key={post.uid} href={`/post/${post.uid}`}>
+              <a key={post.uid}>
+                <h1>{post.data.title}</h1>
+                <p>{post.data.subtitle}</p>
+                <div className={styles.postInfo}>
+                  <div id="createdAt">
+                    <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
+                    <time>{post.first_publication_date}</time>
+                  </div>
+                  <div id="author">
+                    <AiOutlineUser size="20" color={`var(--gray-500)`}/>
+                    <span>{post.data.author}</span>
+                  </div>
+                </div>
+              </a>
+            </Link>
+          )
+         })
+        }
 
-        <a>
-            <h1>Title of the Post</h1>
-            <p>Subtitle of the Post</p>
-            <div className={styles.postInfo}>
-              <div id="createdAt">
-                <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
-                <time>15 Mar 2021</time>
-              </div>
-              <div id="author">
-                <AiOutlineUser size="20" color={`var(--gray-500)`}/>
-                <span>Joseph Oliveira</span>
-              </div>
-            </div>
-        </a>
-
-        <a>
-            <h1>Title of the Post</h1>
-            <p>Subtitle of the Post</p>
-            <div className={styles.postInfo}>
-              <div id="createdAt">
-                <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
-                <time>15 Mar 2021</time>
-              </div>
-              <div id="author">
-                <AiOutlineUser size="20" color={`var(--gray-500)`}/>
-                <span>Joseph Oliveira</span>
-              </div>
-            </div>
-        </a>
-
-        <a>
-            <h1>Title of the Post</h1>
-            <p>Subtitle of the Post</p>
-            <div className={styles.postInfo}>
-              <div id="createdAt">
-                <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
-                <time>15 Mar 2021</time>
-              </div>
-              <div id="author">
-                <AiOutlineUser size="20" color={`var(--gray-500)`}/>
-                <span>Joseph Oliveira</span>
-              </div>
-            </div>
-        </a>
+        { (nextPage != null) 
+          ? <button onClick={handleNextPage} className={styles.paginationButton}>Carregar mais posts</button>
+          : ''
+        }
       </div>
+
+      
     </>
   )
 }
@@ -106,15 +112,39 @@ export const getStaticProps: GetStaticProps = async () => {
       orderings: '[document.last_publication_date]',
       fetch: ['product.title', 'product.price', 'product.image'],
       pageSize: 5,
-    }
+    },
   );
 
+  const next_page = postsResponse.next_page;
+  const posts = postsResponse.results.map(post => {
+    return {
+      uid: post.uid,
+      first_publication_date: format(
+        new Date(post.last_publication_date),
+        "dd MMM yyyy",
+        {
+          locale: ptBR,
+        }
+      ),
+      data: {
+        title: post.data.title,
+        subtitle: post.data.subtitle,
+        author: post.data.author,
+      }
+    }
+  })
   
-  console.log(postsResponse);
+  //console.log(JSON.stringify(postsResponse));
+  //console.log(posts);
 
 
   return {
-    props: { name: 'oi' },
+    props: { 
+      postsPagination: {
+        next_page: next_page,
+        results: posts,
+      }
+    },
     revalidate: 60 * 10, // 10 minutes
   }
 };

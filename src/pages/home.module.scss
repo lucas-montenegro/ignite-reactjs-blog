@@ -48,12 +48,26 @@
 
         time, span {
             margin-left: 8px;
-            //display: inline;
     
             font-weight: 400;
             font-size: 1.4rem;
             line-height: 1.7rem;
             color: var(--gray-500);
         }
+    }
+}
+
+.paginationButton {
+    background-color: transparent;
+    border: 0;
+
+    margin-top: 64px;
+
+    font: 600 1.8rem "Inter", sans-serif;
+    line-height: 2.2rem;
+    color: var(--pink-500);
+
+    &:hover { 
+        text-decoration: underline;
     }
 }
