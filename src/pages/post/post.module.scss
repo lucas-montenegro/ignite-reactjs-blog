@@ -4,11 +4,7 @@
     }
 }
 
-.postBox {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 8rem 0;
-
+.postContainer {
     h1 {
         margin-bottom: 2.4rem;
 
@@ -19,11 +15,21 @@
 
 .postInfo {
     display: flex;
-    flex-direction: row;
+    align-items: center;
     gap: 2.4rem;
 
     li {
+        display: flex;
+        align-items: center;
         list-style: none;
+
+        time, span {
+            font: 400 1.4rem "Inter", sans-serif;
+            line-height: 1.7rem;
+            color: var(--gray-500);
+            
+            margin-left: 0.8rem;
+        }
     }
     
 }
@@ -42,13 +48,14 @@
         font: 400 1.8rem "Inter", sans-serif;
         line-height: 2.2rem;
         color: var(--gray-200);
+        text-align: justify;
     }
 
     a {
         color: var(--pink-500);
     }
 
-    p + p, li + li {
+    p + p, li + li, ul {
         margin-top: 2.4rem;
     }
 }

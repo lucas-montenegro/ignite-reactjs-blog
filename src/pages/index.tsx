@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 
-import { AiOutlineCalendar, AiOutlineUser } from 'react-icons/ai';
+import { FiCalendar, FiUser } from 'react-icons/fi';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
@@ -67,7 +67,7 @@ export default function Home({ postsPagination }: HomeProps) {
 
   return (
     <>
-      <div className={styles.homeBox}>
+      <div className={`${commonStyles.contentContainer}  ${styles.homeContainer}`}>
         <img src="/logo.svg" alt="logo" />
 
         { posts.map(post => {
@@ -78,11 +78,11 @@ export default function Home({ postsPagination }: HomeProps) {
                 <p>{post.data.subtitle}</p>
                 <div className={styles.postInfo}>
                   <div id="createdAt">
-                    <AiOutlineCalendar size="20" color={`var(--gray-500)`}/>
+                    <FiCalendar size="20" color={`var(--gray-500)`}/>
                     <time>{post.first_publication_date}</time>
                   </div>
                   <div id="author">
-                    <AiOutlineUser size="20" color={`var(--gray-500)`}/>
+                    <FiUser size="20" color={`var(--gray-500)`}/>
                     <span>{post.data.author}</span>
                   </div>
                 </div>

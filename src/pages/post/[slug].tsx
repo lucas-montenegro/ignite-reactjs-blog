@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
+
+import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
 import Prismic from '@prismicio/client';
-import { RichText } from 'prismic-dom';
 import * as prismicH from '@prismicio/helpers';
 import { getPrismicClient } from '../../services/prismic';
 
@@ -33,43 +33,47 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  minutesToRead: number;
 }
 
-export default function Post({ post }: PostProps) {
-  const [postStatus, setPostStatus] = useState('loading');
-
-  useEffect(() => {
-    setPostStatus('loaded');
-  });
-
+export default function Post({ post, minutesToRead }: PostProps) {
   return (
     <>
       <Header />
 
-      <div className={styles.bannerBox}>
-        <img src={post?.data.banner.url} alt="banner" />
-      </div>
+      {post?.data === undefined
+        ? <p>Carregando...</p> 
+        : (
+        <>
+          <div className={styles.bannerBox}>
+            <img src={post.data.banner.url} alt="banner" />
+          </div>
 
-      <div className={styles.postBox}>
-        <h1>{post?.data.title}</h1>
+          <div className={`${commonStyles.contentContainer}  ${styles.postContainer}`}>
+            <h1>{post.data.title}</h1>
 
-        <ul className={styles.postInfo}>
-          <li>a</li>
-          <li>b</li>
-          <li>c</li>
-        </ul>
+            <ul className={styles.postInfo}>
+              <li id="date">
+                <FiCalendar size="20" color={`var(--gray-500)`}/>
+                <time>{post.first_publication_date}</time>
+              </li>
+              <li id="author">
+                <FiUser size="20" color={`var(--gray-500)`}/>
+                <span>{post.data.author}</span>
+              </li>
+              <li id="timeToRead">
+                <FiClock size="20" color={`var(--gray-500)`}/>
+                <span>{minutesToRead} min</span>
+              </li>
+            </ul>
 
-        {postStatus === 'loading' ? (
-          <p>Loading…</p>
-        ) : (
-          <div
-            className={styles.postContent}
-            dangerouslySetInnerHTML={{ __html: post?.data.content }}
-          />
-        )}
-      </div>
-
-      
+            <div
+              className={styles.postContent}
+              dangerouslySetInnerHTML={{ __html: post.data.content }}
+            />
+          </div>
+        </>
+      )}
     </>
   );
 }
@@ -81,14 +85,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
     {
       orderings: '[document.last_publication_date desc]',
       fetch: 'post.uid',
-      pageSize: 5,
+      pageSize: 3,
     }
   );
 
-  // console.log(posts);
+  const postsPaths = posts.results.map(post => {
+    return {
+      params: { slug: post.uid},
+    }
+  })
 
   return {
-    paths: [],
+    paths: postsPaths,
     fallback: true,
   };
 };
@@ -120,8 +128,19 @@ export const getStaticProps: GetStaticProps = async context => {
     },
   };
 
+  const wordRegex = /[!@#$%^&*(),%:;"'¨<>/[\]{}=?+\d\s . -]+/g;
+
+  const wordsInPost = response.data.content.reduce((previousItems, currentItem) =>
+    previousItems + currentItem.heading.split(' ').length + prismicH.asText(currentItem.body).split(wordRegex).length,
+    0
+  ); // this returns an empty string ("") counting as a word at the end of each paragraph
+
+  const emptyWordsCount = response.data.content.length; // taking out the empty string ("") of each paragraph
+
+  const minutesToRead = Math.ceil((wordsInPost - emptyWordsCount) / 200);
+
   return {
-    props: { post },
+    props: { post, minutesToRead },
     revalidate: 60 * 10, // 10 minutes
   };
 };
