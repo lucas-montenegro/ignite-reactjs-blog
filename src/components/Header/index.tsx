@@ -1,9 +1,11 @@
 import styles from './header.module.scss';
 
-export default function Header() {
+export function Header() {
   return (
     <div className={styles.headerBox}>
-      <img src="/logo.svg" alt="logo" />
+        <a href="/">
+          <img src="/logo.svg" alt="logo" />
+        </a>
     </div>
   )
 }

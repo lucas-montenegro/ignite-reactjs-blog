@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
@@ -109,8 +109,7 @@ export const getStaticProps: GetStaticProps = async () => {
      Prismic.Predicates.at('document.type', 'post'),
     ],
     {
-      orderings: '[document.last_publication_date]',
-      fetch: ['product.title', 'product.price', 'product.image'],
+      orderings: '[document.last_publication_date desc]', 
       pageSize: 5,
     },
   );
@@ -120,7 +119,7 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       uid: post.uid,
       first_publication_date: format(
-        new Date(post.last_publication_date),
+        new Date(post.first_publication_date),
         "dd MMM yyyy",
         {
           locale: ptBR,

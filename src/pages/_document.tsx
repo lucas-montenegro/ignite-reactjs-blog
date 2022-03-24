@@ -1,12 +1,12 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document'
-
+//<link rel="icon" href="/favicon.jpg" />
 export default class MyDocument extends Document {
   render() {
     return (
       <Html>
         <Head>
           <title>Ignite News</title>
-          <link rel="icon" href="/favicon.jpg" />
+          
   
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
