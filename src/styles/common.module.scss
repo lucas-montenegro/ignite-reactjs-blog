@@ -3,3 +3,15 @@
     margin: 0 auto;
     padding: 8rem 0; 
 }
+
+@media (max-width: 720px)  {
+    .contentContainer {
+        max-width: 320px;
+    }   
+}
+  
+@media (max-width: 375px) {
+    .contentContainer {
+        max-width: 260px;
+    }   
+}

@@ -24,6 +24,12 @@ html {
   }
 }
 
+@media (max-width: 375px) {
+  html {
+    font-size: 40%;
+  }
+}
+
 body {
   background: var(--gray-800);
   color: var(--white);

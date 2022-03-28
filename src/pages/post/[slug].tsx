@@ -1,4 +1,6 @@
+import Head from 'next/head';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import { useRouter } from 'next/router';
 
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 
@@ -37,12 +39,18 @@ interface PostProps {
 }
 
 export default function Post({ post, minutesToRead }: PostProps) {
+  const router = useRouter();
+
   return (
     <>
+      <Head>
+        <title>Ignite News | Post</title>
+      </Head>
+
       <Header />
 
-      {post?.data === undefined
-        ? <p>Carregando...</p> 
+      { router.isFallback
+        ? <div>Carregando...</div> 
         : (
         <>
           <div className={styles.bannerBox}>

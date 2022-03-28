@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useState } from 'react';
 
 import { GetStaticProps } from 'next';
@@ -67,6 +68,10 @@ export default function Home({ postsPagination }: HomeProps) {
 
   return (
     <>
+      <Head>
+        <title>Ignite News | Home</title>
+      </Head>
+
       <div className={`${commonStyles.contentContainer}  ${styles.homeContainer}`}>
         <img src="/logo.svg" alt="logo" />
 
