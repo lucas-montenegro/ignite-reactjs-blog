@@ -7,12 +7,13 @@ import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
-import Prismic from '@prismicio/client';
+import * as Prismic from '@prismicio/client';
 import * as prismicH from '@prismicio/helpers';
-import { getPrismicClient } from '../../services/prismic';
+import { getPrismicClient, linkResolver } from '../../services/prismic';
 
 import { Header } from '../../components/Header';
 import { Comment } from '../../components/Comment';
+import { ExitPreviewButton } from '../../components/ExitPreviewButton';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -34,12 +35,20 @@ interface Post {
   };
 }
 
+interface PostLink {
+  title: string;
+  link: string;
+}
+
 interface PostProps {
   post: Post;
   minutesToRead: number;
+  preview: boolean;
+  previousPost: PostLink | null;
+  nextPost: PostLink | null;
 }
 
-export default function Post({ post, minutesToRead }: PostProps) {
+export default function Post({ post, minutesToRead, preview, previousPost, nextPost }: PostProps) {
   const router = useRouter();
 
   return (
@@ -81,7 +90,30 @@ export default function Post({ post, minutesToRead }: PostProps) {
               dangerouslySetInnerHTML={{ __html: post.data.content }}
             />
 
-            <Comment />
+            <div className={styles.footer}>
+              <div className={styles.postsLinkContainer}>
+                {previousPost && 
+                  <div className={styles.postLinkPrev}>
+                    <p>{previousPost.title}</p>
+                    <a href={previousPost.link}>Post anterior</a>
+                  </div>
+                }
+
+                {nextPost && 
+                  <div className={styles.postLinkNext}>
+                    <p>{nextPost.title}</p>
+                    <a href={nextPost.link}>Próximo Post</a>
+                  </div>
+                }
+              </div>
+              
+
+              <Comment />
+
+              { preview && <ExitPreviewButton />}
+            </div>
+
+            
           </div>
         </>
       )}
@@ -94,7 +126,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await prismic.getByType('post', { 
     orderings: {
       field: 'document.last_publication_date',
-      direction: 'desc'
+      direction: 'desc',
     },
     pageSize: 3,
   });
@@ -116,7 +148,7 @@ export const getStaticProps: GetStaticProps = async ({ params, previewData }) =>
 
   const prismic = getPrismicClient({ previewData });
   const response = await prismic.getByUID<any>('post', slug);
-
+  
   const post = {
     first_publication_date: format(
       new Date(response.first_publication_date),
@@ -149,8 +181,60 @@ export const getStaticProps: GetStaticProps = async ({ params, previewData }) =>
 
   const minutesToRead = Math.ceil((wordsInPost - emptyWordsCount) / 200);
 
+  const preview = previewData === undefined ? false : true;
+
+  const postFirstPublicationDate = response.first_publication_date;
+
+  // fetching previousPost data
+  let previousPostResponse;
+  let previousPost;
+
+  try {
+    previousPostResponse = await prismic?.getFirst({
+      predicates: [
+        Prismic.predicate.dateAfter('document.first_publication_date', postFirstPublicationDate),  
+        Prismic.predicate.at('document.type', 'post'),
+      ],
+      orderings: { // getting the first post published before current post
+        field: 'document.first_publication_date',
+        direction: 'asc',
+      },
+    });
+
+    previousPost = {
+      title: previousPostResponse.data.title,
+      link: linkResolver(previousPostResponse),
+    };
+  } catch (err) {
+    previousPost = null;
+  }
+  
+  // fetching nextPost data
+  let nextPostResponse;
+  let nextPost;
+
+  try {
+    nextPostResponse = await prismic.getFirst({
+      predicates: [
+        Prismic.predicate.dateBefore('document.first_publication_date', postFirstPublicationDate),  
+        Prismic.predicate.at('document.type', 'post'),
+      ],
+      orderings: { // getting the first post published before current post
+        field: 'document.first_publication_date',
+        direction: 'desc',
+      },
+    });
+
+    nextPost = {
+      title: nextPostResponse.data.title,
+      link: linkResolver(nextPostResponse),
+    };
+  } catch {
+    nextPost = null;
+  }
+
   return {
-    props: { post, minutesToRead },
+    props: { post, minutesToRead, preview, previousPost, nextPost },
     revalidate: 60 * 10, // 10 minutes
   };
 };

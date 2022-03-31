@@ -1621,10 +1621,10 @@
     escape-html "^1.0.3"
     imgix-url-builder "^0.0.3"
 
-"@prismicio/next@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@prismicio/next/-/next-0.0.5.tgz#e4669b42f56cc66e27d08f469e73b12c29534f73"
-  integrity sha512-36ieS/eIIYGphHaytwmWfIjfoM30u7wBtwQQLGAZlXgMjgU5D9NHYtugpqVkXn3J7IKbpudxiaNu32rqa8i1oQ==
+"@prismicio/next@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@prismicio/next/-/next-0.1.0.tgz#d582a48de437ed02e37f7a8e5f5f496e31622145"
+  integrity sha512-brjvoC9wgGkcTbI5yBEeevLCq51nN3GJc2y11ZdYMqmJkP13VDbGAwXzWSD6id3TmbcecaSj6/G9g4BUL8973w==
   dependencies:
     "@prismicio/react" "^2.0.2"
 

@@ -1,12 +1,12 @@
 import { PrismicDocument } from '@prismicio/types';
 import * as prismic from '@prismicio/client';
 import { enableAutoPreviews } from '@prismicio/next';
+import sm from '../../sm.json';
 
-export const repositoryName = 'ignite-blog-lucasmaa';
+export const repositoryName = new URL(sm.apiEndpoint).hostname.split('')[0];
 
 export function linkResolver(doc: PrismicDocument): string {
-  console.log(doc);
-  if (doc.type === 'posts') {
+  if (doc.type === 'post') {
     return `/post/${doc.uid}`;
   }
 

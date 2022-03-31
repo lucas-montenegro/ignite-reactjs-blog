@@ -9,7 +9,10 @@ import { FiCalendar, FiUser } from 'react-icons/fi';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
-import * as Prismic from '@prismicio/client';
+import { PreviewDataProps } from '../types/PreviewData';
+
+import { ExitPreviewButton } from '../components/ExitPreviewButton';
+
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -33,9 +36,10 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: boolean;
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination, preview }: HomeProps) {
   const [posts, setPosts] = useState<Post[]>(postsPagination.results);
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
 
@@ -101,24 +105,25 @@ export default function Home({ postsPagination }: HomeProps) {
           ? <button onClick={handleNextPage} className={styles.paginationButton}>Carregar mais posts</button>
           : ''
         }
-      </div>
 
-      
+        { preview && <ExitPreviewButton />}
+      </div>
     </>
   )
 }
 
-export const getStaticProps: GetStaticProps = async () => {
-  const prismic = getPrismicClient();
+export const getStaticProps: GetStaticProps = async ({ previewData }: PreviewDataProps) => {
+  const prismic = getPrismicClient({ previewData });
+
   const postsResponse = await prismic.getByType('post', {
     orderings: {
-      field: 'document.last_publication_date',
+      field: 'document.first_publication_date',
       direction: 'desc',
     },
     pageSize: 5,
   });
-  
-  const next_page = postsResponse.next_page;
+
+  const { next_page } = postsResponse;
   
   const posts = postsResponse.results.map(post => {
     return {
@@ -138,6 +143,8 @@ export const getStaticProps: GetStaticProps = async () => {
     }
   })
   
+  const preview = previewData === undefined ? false : true;
+
   //console.log(JSON.stringify(postsResponse));
   //console.log(posts);
 
@@ -147,7 +154,8 @@ export const getStaticProps: GetStaticProps = async () => {
       postsPagination: {
         next_page,
         results: posts,
-      }
+      },
+      preview,
     },
     revalidate: 60 * 10, // 10 minutes
   }
