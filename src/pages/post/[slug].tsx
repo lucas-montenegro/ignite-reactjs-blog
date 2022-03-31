@@ -12,6 +12,7 @@ import * as prismicH from '@prismicio/helpers';
 import { getPrismicClient } from '../../services/prismic';
 
 import { Header } from '../../components/Header';
+import { Comment } from '../../components/Comment';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
@@ -79,6 +80,8 @@ export default function Post({ post, minutesToRead }: PostProps) {
               className={styles.postContent}
               dangerouslySetInnerHTML={{ __html: post.data.content }}
             />
+
+            <Comment />
           </div>
         </>
       )}
@@ -88,14 +91,13 @@ export default function Post({ post, minutesToRead }: PostProps) {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const prismic = getPrismicClient();
-  const posts = await prismic.query(
-    [Prismic.Predicates.at('document.type', 'post')],
-    {
-      orderings: '[document.last_publication_date desc]',
-      fetch: 'post.uid',
-      pageSize: 3,
-    }
-  );
+  const posts = await prismic.getByType('post', { 
+    orderings: {
+      field: 'document.last_publication_date',
+      direction: 'desc'
+    },
+    pageSize: 3,
+  });
 
   const postsPaths = posts.results.map(post => {
     return {
@@ -109,10 +111,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async context => {
-  const { slug } = context.params;
+export const getStaticProps: GetStaticProps = async ({ params, previewData }) => {
+  const { slug } = params;
 
-  const prismic = getPrismicClient();
+  const prismic = getPrismicClient({ previewData });
   const response = await prismic.getByUID<any>('post', slug);
 
   const post = {
