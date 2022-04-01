@@ -15,7 +15,9 @@ export function linkResolver(doc: PrismicDocument): string {
 
 // This factory function allows smooth preview setup
 export function getPrismicClient(config = {}) {
-  const client = prismic.createClient(process.env.PRISMIC_API_ENDPOINT);
+  const client = prismic.createClient(process.env.PRISMIC_API_ENDPOINT, {
+    accessToken: process.env.PRISMIC_ACCESS_TOKEN,
+  });
 
   enableAutoPreviews({
     client,

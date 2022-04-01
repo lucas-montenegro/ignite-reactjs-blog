@@ -11,6 +11,15 @@
         font: 700 4.8rem "Inter", sans-serif;
         line-height: 5.8rem;
     }
+
+    .editedPostTime {
+        margin-top: 1.6rem;
+
+        font: 400 1.4rem "Inter", sans-serif;
+        font-style: italic;
+        color: var(--gray-500);
+        line-height: 1.7rem;        
+    }
 }
 
 .postInfo {
@@ -31,7 +40,6 @@
             margin-left: 0.8rem;
         }
     }
-    
 }
 
 

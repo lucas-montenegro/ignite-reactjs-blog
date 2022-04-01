@@ -43,12 +43,13 @@ interface PostLink {
 interface PostProps {
   post: Post;
   minutesToRead: number;
+  editedAt: string | null;
   preview: boolean;
   previousPost: PostLink | null;
   nextPost: PostLink | null;
 }
 
-export default function Post({ post, minutesToRead, preview, previousPost, nextPost }: PostProps) {
+export default function Post({ post, minutesToRead, editedAt, preview, previousPost, nextPost }: PostProps) {
   const router = useRouter();
 
   return (
@@ -84,6 +85,8 @@ export default function Post({ post, minutesToRead, preview, previousPost, nextP
                 <span>{minutesToRead} min</span>
               </li>
             </ul>
+
+            { editedAt && <p className={styles.editedPostTime}>* editado em {editedAt}</p> }
 
             <div
               className={styles.postContent}
@@ -181,6 +184,16 @@ export const getStaticProps: GetStaticProps = async ({ params, previewData }) =>
 
   const minutesToRead = Math.ceil((wordsInPost - emptyWordsCount) / 200);
 
+  const editedAt = (post.first_publication_date !== post.last_publication_date) 
+    ? format(
+        new Date(response.last_publication_date),
+        "dd MMM yyyy, à's' p",
+        {
+          locale: ptBR,
+        }
+      )
+    : null;
+
   const preview = previewData === undefined ? false : true;
 
   const postFirstPublicationDate = response.first_publication_date;
@@ -234,7 +247,7 @@ export const getStaticProps: GetStaticProps = async ({ params, previewData }) =>
   }
 
   return {
-    props: { post, minutesToRead, preview, previousPost, nextPost },
+    props: { post, minutesToRead, editedAt, preview, previousPost, nextPost },
     revalidate: 60 * 10, // 10 minutes
   };
 };
